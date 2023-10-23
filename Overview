@@ -1,0 +1,38 @@
+Installing Container Tools
+# > sudo yum -y module install container-tools
+
+Key Commands
+1. Podman - Used to directly manage containers and container images.
+2. Skopeo - Used to inspect, copy, delete, and sign container images.
+3. Buildah - Used to create new container images.
+
+Red Hat Container Registries
+1. registry.redhat.io - used for containers based on official Red Hat products
+2. registry.connect.redhat.com - used for containers based on third-party packages.
+The default container registry configuration also provides access to docker.io. This is configured in /etc/containers/registries.conf.
+
+We will search for the Red Hat universal base image.
+# > podman search registry.access.redhat.com/ubi8 | less 
+# > podman pull registry.access.redhat.com/ubi8/ubi:latest
+# > podman images
+
+Let’s use skopeo to inspect the image.
+# > skopeo inspect docker://registry.access.redhat.com/ubi8/ubi:latest | less
+
+Now that we have our image, let’s run it.
+# > podman run -it registry.access.redhat.com/ubi8/ubi:latest
+We use the (-it) flag so the container is interactive. After running the above command, we are in an interactive terminal inside our container.
+Container # > cat /etc/redhat-version
+Container # > exit
+
+Let's clean up.
+# > podman ps --all
+We see our running containers.
+
+Let's remove our container (be cautious - this will remove all containers)
+# > podman rm -a
+# > podman ps --all
+
+# > podman images
+We see we still have our image, but want to remove it. 
+# podman rmi registry.acces.redhat.com/ubi8/ubi:latest
