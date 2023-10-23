@@ -1,0 +1,57 @@
+Let's work with Apache on Red Hat Enterprise Linux. We will add network access to our Apache container with persistent storage attached.
+
+# > skopeo inspect docker://registry.access.redhat.com/rhscl/httpd-24-rhel7 | less 
+# > podman run -d (detached) -p (port) 8000:8080 registry.access.redhat.com/rhscl/httpd-24-rhel7
+# > podman ps -a
+We see our running container
+
+Let’s see if we can get to the Apache server.
+# > curl http://localhost:8000
+
+# > podman stop -a
+# > podman ps -a
+Our container is stopped with a status of Exited.
+
+Sometimes we may need to execute commands to gather quick information about a container. One way to do this is to open a shell in that container.
+# > podman run -it registry.access.redhat.com/rhscl/httpd-24-rhel7 /bin/bash
+Bash 4.2 # > cat /etc/redhat-release
+Bash 4.2 # > exit
+# > podman ps -a
+We have two containers with both exited. Whenever you leave a container shell, the container terminates.
+
+Let's see how to add a name to a new detached container.
+# > podman run -d --name test_container registry.access.redhat.com/rhscl/httpd-24-rhel7 
+# > podman ps -a
+We see our test_container is up and running.
+
+If you want to run one command against a running container.
+# > podman exec -it test_container cat /etc/redhat-release
+
+Let’s stop our container
+# > podman stop test_container 
+
+# > podman ps -a
+All containers are stopped.
+
+Add persistent storage to a container by using the --volume or -v switch. We will need to create a new directory to use for persistent storage.
+# > mkdir ~/web_data
+# > echo “Test data” > ~/web_data/test.txt
+# > cat ~/web_data/test.txt Test data
+
+Add persistent storage in addition to networking (ports).
+# > podman run -d --name web_container -p 8000:8080 -v ~/web_data:/var/www/html:Z registry.access.redhat.com/rhscl/httpd-24-rhel7
+We’re using our -v volume switch to add web_data in our home directory and we’re going to attach that to /var/www/html in our container.
+We must add the :Z on the end so we can satisfy our SELinux requirements.
+
+# > podman ps -a
+We can see we have our running web container.
+
+Now checking our work
+# > curl http://localhost:8000/test.txt
+We see our "Test data".
+
+Now that we’re done, let’s clean up everything.
+# > podman ps -a
+# > podman stop -a 
+# > podman rm -a 
+# > podman ps -a
